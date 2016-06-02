@@ -30,13 +30,42 @@ module fpga (
 	logic [9:0] sortie;
 	logic [25:0] cpt;  // 2^26 => 64M > 50_000_000	
 	logic clk_div;
-	logic mode;
 	logic g_a_d;
+
+	logic [7:0] pwm;
+	logic [7:0] seuil;
+	logic [1:0] mode;
+	logic etat;
 	
+	always @(*) 
+	begin
+	mode <= sw[1:0];
+	case(mode)
+	
+		2'd 0: seuil <= 8'd 63;
+		2'd 1: seuil <= 8'd 127;
+		2'd 2: seuil <= 8'd 191;
+		2'd 3: seuil <= 8'd 255;
+	
+	endcase
+	end
+	
+	always @(posedge clock_50)
+	if(clk_div)
+	begin
+	if(pwm > seuil)
+		etat=1;
+	else
+		etat=0;
+	if(pwm==255)
+	pwm<=0;
+	else
+	pwm<= pwm+1;
+	end
 	
 	// Compteur (diviseur de freq)
 	always @(posedge clock_50)
-	if(cpt == 25_000_000 -1) 
+	if(cpt == 2000 -1) 
 		begin
 		cpt <= 0;
 		clk_div <= 1;
@@ -46,30 +75,7 @@ module fpga (
 		cpt <= cpt +1;
 		clk_div <= 0;
 		end
-	
-	
-	always @(posedge clock_50)
-	if(!reset_n)
-	begin
-			sortie <=  10'd1;
-			g_a_d <= 0;
-	end
-	else				
-		if (clk_div) 
-			if(!g_a_d)
-			begin
-				if (sortie[8]) g_a_d <= 1;
-				sortie <= sortie << 1;
-			end
-			else
-			begin
-				if (sortie[1]) g_a_d <= 0;
-				sortie <= sortie >> 1;
-	      end
-	
-	always @(*) ledr <= sortie;
-	
-	dec7seg dec0(.i(sortie[3:0]),.o(hex0));
-	dec7seg dec1(.i(sortie[7:4]),.o(hex1));
+		
+	always @(*) ledr[0] <= etat;
 	
 endmodule 
