@@ -29,46 +29,34 @@ module fpga (
    // ajouter votre code à partir d'ici
    
 	logic [7:0] sortie;
-		
-	logic [1:0]push_inc_etat;		
-	logic [1:0]push_dec_etat;		
-		
-	logic inc;
-	logic dec;	
 	
-	// Sauvegarde de l'état actuel et de l'état précédent et permet de decaler automatiquement
+	logic [25:0] cpt;  // 2^26 => 64M > 50_000_000
+	logic clk_div;
+	
+	// Compteur (diviseur de freq)
 	always @(posedge clock_50)
-	begin
-		push_inc_etat <= {push_inc_etat[0], key[1]};
-		push_dec_etat <= {push_dec_etat[0], key[2]};
-	end
+	if(cpt == 50_000_000 -1) 
+		begin
+		cpt <= 0;
+		clk_div <= 1;
+		end
+	else
+		begin
+		cpt <= cpt +1;
+		clk_div <= 0;
+		end
 	
-	// mise a jour des boutons inc et dec lors d'un front montant
-	always@(*)
-	begin
-	   inc <= !push_inc_etat[0] && push_inc_etat[1];
-		dec <= !push_dec_etat[0] && push_dec_etat[1];
-	end
-	
-	// mise a jour des boutons inc et dec lors d'un front descentant
-	//always@(*)
-	//begin
-	//   inc <= push_inc_etat[0] && !push_inc_etat[1];
-	//	  dec <= push_dec_etat[0] && !push_dec_etat[1];
-	//end
-		
-	// Compteur
+	// Compteur (auto)
 	always @(posedge clock_50)
 	if(!reset_n)
 			sortie <=  8'd0;
 	else		
 		begin
-		if (inc)	sortie <= sortie + 1;
-		if (dec)	sortie <= sortie - 1;
+		if (clk_div) sortie <= sortie + 1;		
 		end
-
+	
 	always @(*) ledr <= sortie;
-
+	
 	dec7seg dec0(.i(sortie[3:0]),.o(hex0));
 	dec7seg dec1(.i(sortie[7:4]),.o(hex1));
  
