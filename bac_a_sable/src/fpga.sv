@@ -1,6 +1,8 @@
 `default_nettype none
 
 module fpga (
+        ////////////////////////    50MHz Clock        ///////////////////////
+        input logic            clock_50,        // 50 MHz
         ////////////////////////    Push Button        ///////////////////////
         input logic   [3:0]    key,             //    Pushbutton[3:0]
         ////////////////////////    DPDT Switch        ///////////////////////
@@ -16,8 +18,28 @@ module fpga (
         output logic  [9:0]    ledr             //    LED Red[9:0]
         );
 
+   // Génération d'une horloge lente (0.5s de période)
+   logic             clk;
+   gene_clk gene_clkl(.clk_50(clock_50), .clk_out(clk));
+
+   // Génération d'un reset à partir du bouton key[0]
+   logic             reset_n;
+   gene_reset gene_reset(.clk(clock_50), .key(key[0]), .reset_n(reset_n));
+	
    // ajouter votre code à partir d'ici
-	dec7seg dec_1(.i(sw[3:0]),.o(hex0));
-	dec7seg dec_2(.i(sw[7:4]),.o(hex1));
 		
+	logic [7:0] sortie;
+
+	always @(posedge clk )	
+	if(!reset_n)
+	begin
+		sortie <=  8'd0;
+	end	
+	else
+	begin
+		sortie <= sortie + 1;
+	end
+
+	always @(*) ledr <= sortie;
+ 
 endmodule
