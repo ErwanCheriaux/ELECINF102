@@ -27,11 +27,11 @@ module fpga (
    gene_reset gene_reset(.clk(clock_50), .key(key[0]), .reset_n(reset_n));
 	
    // ajouter votre code à partir d'ici
-		
+	
 	logic [7:0] sortie;
-
-	always @(posedge clk )	
-	if(!reset_n)
+	
+	always @(posedge clk or negedge reset_n)	
+	if(~reset_n)
 	begin
 		sortie <=  8'd0;
 	end	
@@ -39,7 +39,7 @@ module fpga (
 	begin
 		sortie <= sortie + 1;
 	end
-
+	
 	always @(*) ledr <= sortie;
  
 endmodule
