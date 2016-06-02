@@ -17,5 +17,7 @@ module fpga (
         );
 
    // ajouter votre code à partir d'ici
-
+	dec7seg dec_1(.i(sw[3:0]),.o(hex0));
+	dec7seg dec_2(.i(sw[7:4]),.o(hex1));
+		
 endmodule
