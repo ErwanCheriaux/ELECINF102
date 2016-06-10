@@ -12,7 +12,8 @@ module CTR(	input logic clk,
 			input logic  reset_n, 
 			input logic[7:0] I,
 			input logic  Z,
-			input logic  C, 
+			input logic  C,
+ 
 			output logic load_OUT,
 			output logic load_ACC,
 			output logic load_I,
@@ -23,11 +24,35 @@ module CTR(	input logic clk,
 			output logic write
 			);
 
-            // Placer votre code 
-            // entre ICI 
+ // Placer votre code 
+     
+   enum logic[1:0]     {IF, AF, EXE} etat;
+   
+ // Automate
+   always@(posedge clk or negedge reset_n)
+     if(!reset_n)
+       etat <= IF;
+       else
+	 case(etat)
+	   IF	: etat <= AF;
+	   AF	: etat <= EXE;
+	   EXE	: etat <= IF;
+	 endcase  	 
 
-
-            // Et la...
-
+     
+// Gestion des sorties
+   always @(*)
+     begin
+	load_OUT <= (etat == EXE);
+	load_ACC <= (etat == EXE) && (I != 0) && (I<13);
+	load_I <= (etat == IF);
+	load_AD <= (etat == AF);
+	inc_PC <= (etat == IF) || (etat == AF);
+	load_PC <= (etat == AF);
+	sel_adr <= (etat == EXE);
+	write <= (etat == EXE);
+     end
+   
+   
 endmodule // CTR
 

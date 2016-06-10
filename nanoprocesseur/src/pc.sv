@@ -25,7 +25,7 @@ module REG_PC(	input logic clk,
        begin
        if(load_PC)
 	 PC <= data_in;
-       if(inc_PC)
+       else if(inc_PC)
 	 PC <= PC + 1;
        end
    
