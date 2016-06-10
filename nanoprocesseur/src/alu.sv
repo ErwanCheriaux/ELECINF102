@@ -26,8 +26,32 @@ module ALU (
    // Insérez votre code entre ici
 
 
+// Gestion de la sortie Z
+   always@(*)
+     if(S == 0)  Z<=1;
+     else        Z<=0;
+
+   // Gestion des oppéations
+   always@(*)
+	   begin
+	      Cout<=0;
+	      case(I)
+		4'd1: S <=A^B;
+		4'd2: S<=A&B;
+		4'd3: S<=A|B;
+		4'd4: {Cout, S}<=A+B;
+		4'd5: {Cout, S}<=A+B+Cin;
+		4'd6: {Cout, S}<=A-B;
+		4'd7: {Cout, S}<=A-B-Cin;
+		4'd8: {Cout, S}<= {A[7:0], Cin};
+		4'd9: {S[7:0], Cout}<= {Cin, A[7:0]};
+		default: S<=B;
+		
+	      endcase
+	   end
    // Et là
 
 endmodule // ALU
 
    
+ 
